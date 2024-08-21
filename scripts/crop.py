@@ -31,7 +31,7 @@ class Crop:
         self.images = [file for file in self.img_path.glob('**/*')]
 
 
-    def process_image(self, img_path, threshold=200):
+    def process_image(self, img_path, threshold=200, padding=10):
         """
         Process a single image by making its background transparent based on the specified threshold.
 
@@ -43,7 +43,19 @@ class Crop:
         applies the mask to make thos pixels transparent, and saves the processed image to the output directory.
         """
         im = Image.open(img_path).convert("RGBA") # open the image and convert it to RGBA mode
-        data = np.array(im) # convert image data to a NumPy array
+        original_width, original_height = im.size
+        print(original_height)
+
+        # calculate new size with padding 
+        new_width = original_width + 2 * padding
+        new_height = original_height + 2 * padding
+        print(new_height)
+
+        # create a new image with a white background and paste the original image in the center
+        new_im = Image.new("RGBA", (new_width, new_height), (255, 255, 255, 255))
+        new_im.paste(im, (padding, padding))
+
+        data = np.array(new_im) # convert image data to a NumPy array
 
         # create mask for pixels above threshold
         r, g, b, a = data[:, :, 0], data[:, :, 1], data[:, :, 2], data[:, :, 3]
